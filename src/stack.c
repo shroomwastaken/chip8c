@@ -1,5 +1,5 @@
-#include "stack.h"
 #include <stdio.h>
+#include "stack.h"
 
 int push(stack* s, int element) {
 	if (s->index >= MAX_STACK_SIZE - 1) {

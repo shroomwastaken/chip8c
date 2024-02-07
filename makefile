@@ -1,8 +1,11 @@
 main : main.o emu.o stack.o
 	gcc -o main main.o emu.o stack.o
 
-main.o : main.c emu.h common.h
-	gcc -c main.c
+main.o : src/main.c src/emu.h src/common.h
+	gcc -c src/main.c
 
-emu.o :	emu.c emu.h stack.h
-	gcc -c emu.c
+stack.o : src/stack.c src/stack.h
+	gcc -c src/stack.c
+
+emu.o :	src/emu.c src/emu.h src/stack.h
+	gcc -c src/emu.c
