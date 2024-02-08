@@ -6,11 +6,43 @@
 #include <stdlib.h>
 #include <string.h> // for that one time i use memset()
 
+// i couldnt figure this out myself so i copied it from https://github.com/dmatlack/chip8/blob/master/chip8.c
+// and adapted it for my code
+void draw_sprite(emu_ctx* emu, byte x, byte y, byte n) {
+	printf("trying to draw sprite at %d, %d; n = %d\n", x, y, n);
+    unsigned row = y, col = x;
+    unsigned byte_index;
+    unsigned bit_index;
+
+    // set the collision flag to 0
+    emu->registers[0xF] = 0;
+    for (byte_index = 0; byte_index < n; byte_index++) {
+        byte b = emu->game_memory[emu->address_register + byte_index];
+
+        for (bit_index = 0; bit_index < 8; bit_index++) {
+            // the value of the bit in the sprite
+            byte bit = (b >> bit_index) & 0x1;
+            // the value of the current pixel on the screen
+            byte *pixelp = &emu->scr_data[(row + byte_index) % 32][(col + (7 - bit_index)) % 64];
+
+            // if drawing to the screen would cause any pixel to be erased,
+            // set the collision flag to 1
+            if (bit == 1 && *pixelp ==1) emu->registers[0xF] = 1;
+
+            // draw this pixel by XOR
+            *pixelp = *pixelp ^ bit;
+        }
+    }
+}
+
 void process_opcode(emu_ctx* emu, word opcode) {
-	byte first_digit = (opcode & 0xF000) >> 24;
-	byte second_digit = (opcode & 0x0F00) >> 16;
-	byte third_digit = (opcode & 0x00F0) >> 8;
-	byte last_digit = opcode & 0x000F;    
+	if (opcode == 0xFF03)
+		exit(42);
+	byte first_digit = (opcode & 0xF000) >> 12;
+	byte second_digit = (opcode & 0x0F00) >> 8;
+	byte third_digit = (opcode & 0x00F0) >> 4;
+	byte last_digit = opcode & 0x000F;
+
 	switch (first_digit) {
 		case 0:
 			switch (opcode & 0xF) {
@@ -97,7 +129,7 @@ void process_opcode(emu_ctx* emu, word opcode) {
 					break;
 				case 5:
 					// opcode 8XY5: register X -= register Y, register F = 0 if there is an underflow else 1
-					if (emu->registers[second_digit] >= emu->registers[third_digit]) 
+					if (emu->registers[second_digit] >= emu->registers[third_digit])
 						emu->registers[0xF] = 1;
 					else
 						emu->registers[0xF] = 0;
@@ -129,7 +161,7 @@ void process_opcode(emu_ctx* emu, word opcode) {
 			break;
 		case 9:
 			// opcode 9XY0: skip next instruction if register X != register Y
-			if (emu->registers[second_digit] != emu->registers[third_digit]) 
+			if (emu->registers[second_digit] != emu->registers[third_digit])
 				incr_pc(emu);
 			incr_pc(emu);
 			break;
@@ -148,30 +180,46 @@ void process_opcode(emu_ctx* emu, word opcode) {
 			incr_pc(emu);
 			break;
 		case 0xD:
-			printf("unimplemented 0xD");
+			// opcode DXYN: display sprite
+			draw_sprite(emu, second_digit, third_digit, last_digit);
+			incr_pc(emu);
+			break;
 		case 0xE:
-			printf("unimplemented 0xE");
+			// opcode EX9E: skip next instruction if key with value of register X is pressed
+			printf("unimplemented 0xE\n");
+			incr_pc(emu);
+			break;
 		case 0xF:
 			switch (opcode & 0x00FF) {
 				case 0x07:
-					printf("unimplemented fx07");
+					// opcode FX07: register X = delay timer value
+					emu->registers[second_digit] = emu->delay_timer;
 					incr_pc(emu);
+					break;
 				case 0x0A:
 					printf("unimplemented fx0a");
 					incr_pc(emu);
+					break;
 				case 0x15:
-					printf("unimplemented fx15");
+					// opcode FX15: delay timer = register X
+					emu->delay_timer = emu->registers[second_digit];
 					incr_pc(emu);
+					break;
 				case 0x18:
-					printf("unimplemented fx18");
+					// opcode DX18: sound timer = register X
+					emu->sound_timer = emu->registers[second_digit];
 					incr_pc(emu);
+					break;
 				case 0x1E:
 					// opcode FX1E: register I += register X
 					emu->address_register += emu->registers[second_digit];
 					incr_pc(emu);
+					break;
 				case 0x29:
-					printf("unimplemented fx29");
+					// opcode FX29: register I = location of sprite info for symbol in register X
+					emu->address_register = 5 * emu->registers[second_digit];
 					incr_pc(emu);
+					break;
 				case 0x33:
 					// opcode FX33: store binary-coded decimals of register X in the address currently in register I
 					// register I = hundreds digit, register I + 1 = tens digit, register I + 2 = ones digit
