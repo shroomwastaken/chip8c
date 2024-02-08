@@ -33,3 +33,11 @@ word get_op_code(emu_ctx* ctx) {
 	res |= ctx->game_memory[ctx->program_counter + 1];
 	return res;
 }
+
+void incr_pc(emu_ctx *emu) {
+	emu->program_counter += 2;
+}
+
+void set_pc(emu_ctx *emu, word addr) {
+	emu->program_counter = addr;
+}
