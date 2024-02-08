@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "emu.h"
+#include "opcodes.h"
 
-void run_emu(char* path) {
+emu_ctx* init_emu(char* path) {
 	// initialize stack
 	stack* stk = malloc(sizeof(stack));
+	stk->index = -1;
 
 	// initialize context
 	emu_ctx* ctx = malloc(sizeof(emu_ctx));
@@ -14,11 +16,20 @@ void run_emu(char* path) {
 	FILE* file = fopen(path, "rb");
 	fread(&ctx->game_memory[0x200], 0xFFF, 1, file);
 	fclose(file);
+
+	return ctx;
 }
 
-word get_next_op_code(emu_ctx* ctx) {
+void run_emu(emu_ctx* emu) {
+	while (1)
+	{
+		word opcode = get_op_code(emu);
+		process_opcode(emu, opcode);
+	}
+}
+
+word get_op_code(emu_ctx* ctx) {
 	word res = ctx->game_memory[ctx->program_counter] << 8;
 	res |= ctx->game_memory[ctx->program_counter + 1];
-	ctx->program_counter += 2;
 	return res;
 }

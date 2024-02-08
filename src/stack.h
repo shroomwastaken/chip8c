@@ -11,4 +11,4 @@ typedef struct
 } stack;
 
 int push(stack* s, int element);
-int pop(stack* s);
+word pop(stack* s);

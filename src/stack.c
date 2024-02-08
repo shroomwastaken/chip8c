@@ -11,12 +11,12 @@ int push(stack* s, int element) {
 	return 0;
 }
 
-int pop(stack* s) {
+word pop(stack* s) {
 	if (s->index < 0) {
 		printf("ERROR IN STACK: stack underflow");
 		return -1;
 	}
-	int element = s->elements[s->index];
+	word element = s->elements[s->index];
 	s->index--;
 	return element;
 }
