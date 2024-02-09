@@ -14,7 +14,7 @@ typedef struct {
 
 	bool scr_data[32][64];
 	bool keys[16];
-	
+
 	byte delay_timer;
 	byte sound_timer;
 

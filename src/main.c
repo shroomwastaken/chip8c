@@ -16,15 +16,15 @@ int main(int argc, char* argv[]) {
 
 	// begin
 	emu_ctx* emu = init_emu(argv[1]);
-	
+
 	SDL_Init(SDL_INIT_EVERYTHING); // should add error checking lmao
 	SDL_CreateWindowAndRenderer(1280, 640, SDL_WINDOW_SHOWN, &window, &renderer);
 
 	// "game loop"
-    run_emu(emu, window, renderer);
+	run_emu(emu, window, renderer);
 
 	// end
-    SDL_DestroyRenderer(renderer);
+	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	free(emu->stack);
 	free(emu);

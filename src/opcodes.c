@@ -8,29 +8,29 @@
 // i couldnt figure this out myself so i copied it from https://github.com/dmatlack/chip8/blob/master/chip8.c
 // and adapted it for my code
 void draw_sprite(emu_ctx* emu, byte x, byte y, byte n) {
-    unsigned row = y, col = x;
-    unsigned byte_index;
-    unsigned bit_index;
+	unsigned row = y, col = x;
+	unsigned byte_index;
+	unsigned bit_index;
 
-    // set the collision flag to 0
-    emu->registers[0xF] = 0;
-    for (byte_index = 0; byte_index < n; byte_index++) {
-        byte b = emu->game_memory[emu->address_register + byte_index];
+	// set the collision flag to 0
+	emu->registers[0xF] = 0;
+	for (byte_index = 0; byte_index < n; byte_index++) {
+		byte b = emu->game_memory[emu->address_register + byte_index];
 
-        for (bit_index = 0; bit_index < 8; bit_index++) {
-            // the value of the bit in the sprite
-            bool bit = (b >> bit_index) & 0x1;
-            // the value of the current pixel on the screen
-            bool *pixelp = &emu->scr_data[(row + byte_index) % 32][(col + (7 - bit_index)) % 64];
+		for (bit_index = 0; bit_index < 8; bit_index++) {
+			// the value of the bit in the sprite
+			bool bit = (b >> bit_index) & 0x1;
+			// the value of the current pixel on the screen
+			bool *pixelp = &emu->scr_data[(row + byte_index) % 32][(col + (7 - bit_index)) % 64];
 
-            // if drawing to the screen would cause any pixel to be erased,
-            // set the collision flag to 1
-            if (bit && *pixelp) emu->registers[0xF] = 1;
+			// if drawing to the screen would cause any pixel to be erased,
+			// set the collision flag to 1
+			if (bit && *pixelp) emu->registers[0xF] = 1;
 
-            // draw this pixel by XOR
-            *pixelp = *pixelp ^ bit;
-        }
-    }
+			// draw this pixel by XOR
+			*pixelp = *pixelp ^ bit;
+		}
+	}
 }
 
 void process_opcode(emu_ctx* emu, word opcode) {
@@ -49,7 +49,7 @@ void process_opcode(emu_ctx* emu, word opcode) {
 							emu->scr_data[y][x] = 0;
 						}
 					}
-					
+
 					incr_pc(emu);
 					break;
 				case 0xE:
