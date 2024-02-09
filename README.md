@@ -6,7 +6,7 @@ only works on linux right now
 ```./chip8c <rom file name>```
 
 this emulator runs at an *emulated* 60FPS
-because computers are very fast now if i didnt cap the framerate it wouldve been impossible to play any games on this thing, everything would be going too fast
+because computers are very fast now if i didnt cap the framerate it wouldve been impossible to play any games on this thing, everything would be going too fast (and it would take up 35% of your cpu)
 
 # keys
 
