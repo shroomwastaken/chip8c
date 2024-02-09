@@ -3,7 +3,7 @@
 
 int push(stack* s, int element) {
 	if (s->index >= MAX_STACK_SIZE - 1) {
-		printf("ERROR IN STACK: stack overflow");
+		printf("ERROR IN STACK: stack overflow, index %d\n", s->index);
 		return -1;
 	}
 	s->index++;
@@ -13,7 +13,7 @@ int push(stack* s, int element) {
 
 word pop(stack* s) {
 	if (s->index < 0) {
-		printf("ERROR IN STACK: stack underflow");
+		printf("ERROR IN STACK: stack underflow, index %d\n", s->index);
 		return -1;
 	}
 	word element = s->elements[s->index];

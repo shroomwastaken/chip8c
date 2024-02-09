@@ -7,7 +7,6 @@
 
 static SDL_Window* window;
 static SDL_Renderer* renderer;
-static SDL_Event event;
 
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
@@ -18,11 +17,11 @@ int main(int argc, char* argv[]) {
 	// begin
 	emu_ctx* emu = init_emu(argv[1]);
 	
-	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_CreateWindowAndRenderer(512, 256, SDL_WINDOW_SHOWN, &window, &renderer);
+	SDL_Init(SDL_INIT_EVERYTHING); // should add error checking lmao
+	SDL_CreateWindowAndRenderer(1280, 640, SDL_WINDOW_SHOWN, &window, &renderer);
 
 	// "game loop"
-    run_emu(emu, window, renderer, &event);
+    run_emu(emu, window, renderer);
 
 	// end
     SDL_DestroyRenderer(renderer);

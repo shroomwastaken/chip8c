@@ -7,7 +7,7 @@
 typedef struct
 {
 	word elements[MAX_STACK_SIZE];
-	unsigned char index;
+	short int index; // this is an int for it to start out at -1
 } stack;
 
 int push(stack* s, int element);

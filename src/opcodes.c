@@ -4,12 +4,10 @@
 #include "emu.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> // for that one time i use memset()
 
 // i couldnt figure this out myself so i copied it from https://github.com/dmatlack/chip8/blob/master/chip8.c
 // and adapted it for my code
 void draw_sprite(emu_ctx* emu, byte x, byte y, byte n) {
-	printf("trying to draw sprite at %d, %d; n = %d\n", x, y, n);
     unsigned row = y, col = x;
     unsigned byte_index;
     unsigned bit_index;
@@ -21,13 +19,13 @@ void draw_sprite(emu_ctx* emu, byte x, byte y, byte n) {
 
         for (bit_index = 0; bit_index < 8; bit_index++) {
             // the value of the bit in the sprite
-            byte bit = (b >> bit_index) & 0x1;
+            bool bit = (b >> bit_index) & 0x1;
             // the value of the current pixel on the screen
-            byte *pixelp = &emu->scr_data[(row + byte_index) % 32][(col + (7 - bit_index)) % 64];
+            bool *pixelp = &emu->scr_data[(row + byte_index) % 32][(col + (7 - bit_index)) % 64];
 
             // if drawing to the screen would cause any pixel to be erased,
             // set the collision flag to 1
-            if (bit == 1 && *pixelp ==1) emu->registers[0xF] = 1;
+            if (bit && *pixelp) emu->registers[0xF] = 1;
 
             // draw this pixel by XOR
             *pixelp = *pixelp ^ bit;
@@ -36,8 +34,6 @@ void draw_sprite(emu_ctx* emu, byte x, byte y, byte n) {
 }
 
 void process_opcode(emu_ctx* emu, word opcode) {
-	if (opcode == 0xFF03)
-		exit(42);
 	byte first_digit = (opcode & 0xF000) >> 12;
 	byte second_digit = (opcode & 0x0F00) >> 8;
 	byte third_digit = (opcode & 0x00F0) >> 4;
@@ -48,11 +44,18 @@ void process_opcode(emu_ctx* emu, word opcode) {
 			switch (opcode & 0xF) {
 				case 0:
 					// opcode 00E0: CLS
-					memset(emu->scr_data, 0, sizeof(emu->scr_data));
+					for (size_t y = 0; y < 32; y++) {
+						for (size_t x = 0; x < 64; x++) {
+							emu->scr_data[y][x] = 0;
+						}
+					}
+					
+					incr_pc(emu);
 					break;
 				case 0xE:
 					// opcode 00EE: RET
 					set_pc(emu, pop(emu->stack));
+					incr_pc(emu);
 					break;
 			}
 			break;
@@ -181,13 +184,24 @@ void process_opcode(emu_ctx* emu, word opcode) {
 			break;
 		case 0xD:
 			// opcode DXYN: display sprite
-			draw_sprite(emu, second_digit, third_digit, last_digit);
+			draw_sprite(emu, emu->registers[second_digit], emu->registers[third_digit], last_digit);
 			incr_pc(emu);
 			break;
 		case 0xE:
-			// opcode EX9E: skip next instruction if key with value of register X is pressed
-			printf("unimplemented 0xE\n");
-			incr_pc(emu);
+			switch (last_digit) {
+				case 0xE:
+					// opcode EX9E: skip next instruction if key with value of register X is pressed
+					if (emu->keys[emu->registers[second_digit]])
+						incr_pc(emu);
+					incr_pc(emu);
+					break;
+				case 0x1:
+					// opcode EXA1: skip next instruction if key with value of register X is not pressed
+					if (!emu->keys[emu->registers[second_digit]])
+						incr_pc(emu);
+					incr_pc(emu);
+					break;
+			}
 			break;
 		case 0xF:
 			switch (opcode & 0x00FF) {
@@ -197,8 +211,8 @@ void process_opcode(emu_ctx* emu, word opcode) {
 					incr_pc(emu);
 					break;
 				case 0x0A:
-					printf("unimplemented fx0a");
-					incr_pc(emu);
+					emu->waiting = true;
+					emu->waiting_reg = second_digit;
 					break;
 				case 0x15:
 					// opcode FX15: delay timer = register X
