@@ -10,7 +10,8 @@ static SDL_Renderer* renderer;
 
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
-		printf("Usage: chip8c.exe <game file>\n");
+		printf("usage: chip8c.exe <game file>\npress any key to exit");
+		getchar();
 		return 1;
 	}
 
