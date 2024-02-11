@@ -18,6 +18,9 @@ int main(int argc, char* argv[]) {
 	// begin
 	emu_ctx* emu = init_emu(argv[1]);
 
+	if (emu == NULL)
+		return 1;
+
 	SDL_Init(SDL_INIT_EVERYTHING); // should add error checking lmao
 	SDL_CreateWindowAndRenderer(1280, 640, SDL_WINDOW_SHOWN, &window, &renderer);
 

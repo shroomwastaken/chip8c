@@ -93,6 +93,15 @@ void process_key(emu_ctx* emu, SDL_KeyCode key, bool state) {
 }
 
 emu_ctx* init_emu(char* path) {
+	// load in file
+	FILE* file = fopen(path, "rb");
+
+	if (file == NULL) {
+		printf("something went wrong while opening the rom file!\npress any key to exit\n");
+		getchar();
+		return NULL; // return a null pointer here and check in main
+	}
+
 	// initialize stack
 	stack* stk = malloc(sizeof(stack));
 	stk->index = -1;
@@ -107,14 +116,6 @@ emu_ctx* init_emu(char* path) {
 	// load in the basic font
 	for (int i = 0; i < 80; i++) {
 		ctx->game_memory[i] = chip8_fontset[i];
-	}
-
-	// load in file
-	FILE* file = fopen(path, "rb");
-
-	if (file == NULL) {
-		printf("something went wrong while opening the rom file!\npress any key to exit\n");
-		getchar();
 	}
 
 	fread(&ctx->game_memory[0x200], 1, 0x1000 - 0x200, file);
