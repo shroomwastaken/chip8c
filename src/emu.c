@@ -111,6 +111,12 @@ emu_ctx* init_emu(char* path) {
 
 	// load in file
 	FILE* file = fopen(path, "rb");
+
+	if (file == NULL) {
+		printf("something went wrong while opening the rom file!\npress any key to exit\n");
+		getchar();
+	}
+
 	fread(&ctx->game_memory[0x200], 1, 0x1000 - 0x200, file);
 	fclose(file);
 
